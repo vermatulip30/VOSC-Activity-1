@@ -1,0 +1,70 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #030712;
+    color: #f8fafc;
+    overflow-x: hidden;
+}
+
+.font-outfit {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Neon Glow Effects */
+.neon-glow-cyan {
+    text-shadow: 0 0 15px rgba(6, 182, 212, 0.8), 0 0 30px rgba(6, 182, 212, 0.4);
+}
+
+.neon-glow-magenta {
+    text-shadow: 0 0 15px rgba(236, 72, 153, 0.8), 0 0 30px rgba(236, 72, 153, 0.4);
+}
+
+.cell-cyan {
+    color: #22d3ee;
+    background: rgba(6, 182, 212, 0.08);
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.1), 0 0 15px rgba(6, 182, 212, 0.15);
+}
+
+.cell-magenta {
+    color: #f472b6;
+    background: rgba(236, 72, 153, 0.08);
+    border-color: rgba(236, 72, 153, 0.3);
+    box-shadow: inset 0 0 20px rgba(236, 72, 153, 0.1), 0 0 15px rgba(236, 72, 153, 0.15);
+}
+
+@keyframes pulseWin {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 45px rgba(168, 85, 247, 0.9);
+    }
+}
+
+.winning-cell {
+    animation: pulseWin 0.8s ease-in-out infinite;
+    background: rgba(168, 85, 247, 0.2) !important;
+    border-color: rgba(168, 85, 247, 0.8) !important;
+}
+
+/* Background Animated Grid Pattern */
+.bg-grid {
+    background-size: 40px 40px;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #030712;
+}
+::-webkit-scrollbar-thumb {
+    background: #1f2937;
+    border-radius: 3px;
+}

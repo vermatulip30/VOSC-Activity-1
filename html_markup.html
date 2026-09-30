@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO-TACTICS // Quantum Grid</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for victory animations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Custom Stylesheet link -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between relative bg-grid selection:bg-cyan-500 selection:text-black">
+
+    <!-- Atmospheric background glowing orbs -->
+    <div class="absolute top-10 left-1/4 w-[450px] h-[450px] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
+    <div class="absolute bottom-10 right-1/4 w-[450px] h-[450px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style="animation-duration: 4s;"></div>
+
+    <!-- Game Header Navigation -->
+    <header class="w-full py-5 px-6 max-w-4xl mx-auto flex items-center justify-between z-10">
+        <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-500 p-[1px] shadow-lg shadow-cyan-500/20">
+                <div class="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-cube text-cyan-400 text-lg"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="font-outfit font-extrabold text-xl sm:text-2xl tracking-wider uppercase bg-gradient-to-r from-cyan-400 via-indigo-300 to-fuchsia-400 bg-clip-text text-transparent">Neo-Tactics</h1>
+                <p class="text-[10px] tracking-widest text-slate-400 uppercase font-semibold">Quantum Grid Edition</p>
+            </div>
+        </div>
+        
+        <!-- Game Mode Toggle Selector -->
+        <div class="flex items-center bg-slate-900/90 backdrop-blur-xl p-1.5 rounded-2xl border border-slate-800 shadow-xl">
+            <button id="modePvpBtn" onclick="setGameMode('pvp')" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-300 bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20">
+                <i class="fa-solid fa-user-group mr-1.5"></i> PvP 2P
+            </button>
+            <button id="modeAiBtn" onclick="setGameMode('ai')" class="px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-300 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-microchip mr-1.5"></i> vs AI Bot
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-4 z-10 max-w-md mx-auto w-full">
+        
+        <!-- AI Difficulty Selector Panel (Hidden in PvP) -->
+        <div id="aiDifficultyPanel" class="hidden w-full mb-4 bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 p-3 rounded-2xl flex items-center justify-between transition-all shadow-lg">
+            <span class="text-xs font-semibold text-slate-300 flex items-center"><i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> AI Neural Engine:</span>
+            <div class="flex space-x-2">
+                <button id="diffEasy" onclick="setDifficulty('easy')" class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-800 text-slate-400 hover:text-white transition">Standard</button>
+                <button id="diffHard" onclick="setDifficulty('hard')" class="px-3 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-sm transition">Quantum (Hard)</button>
+            </div>
+        </div>
+
+        <!-- Live Scoreboard -->
+        <div class="w-full grid grid-cols-3 gap-3 mb-5">
+            <div id="scoreXCard" class="bg-slate-900/80 backdrop-blur-xl border border-cyan-500/40 p-3.5 rounded-2xl text-center shadow-lg transition-all">
+                <span id="labelPlayerX" class="block text-[10px] uppercase tracking-wider text-cyan-400 font-extrabold mb-1">Player X</span>
+                <span id="scoreX" class="font-outfit text-2xl font-black text-white">0</span>
+            </div>
+            <div class="bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 p-3.5 rounded-2xl text-center shadow-lg">
+                <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mb-1">Draws</span>
+                <span id="scoreDraws" class="font-outfit text-2xl font-black text-slate-300">0</span>
+            </div>
+            <div id="scoreOCard" class="bg-slate-900/80 backdrop-blur-xl border border-fuchsia-500/20 p-3.5 rounded-2xl text-center shadow-lg transition-all">
+                <span id="labelPlayerO" class="block text-[10px] uppercase tracking-wider text-fuchsia-400 font-extrabold mb-1">Player O</span>
+                <span id="scoreO" class="font-outfit text-2xl font-black text-white">0</span>
+            </div>
+        </div>
+
+        <!-- Turn & Status Bar -->
+        <div class="w-full bg-slate-900/70 backdrop-blur-xl border border-slate-800/90 py-3 px-4 rounded-2xl mb-5 flex items-center justify-center space-x-3 shadow-xl">
+            <span id="turnIndicator" class="w-3 h-3 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50 animate-ping"></span>
+            <p id="gameStatus" class="font-outfit font-bold text-sm tracking-wide text-slate-200">Player X's Turn</p>
+        </div>
+
+        <!-- Game Board Grid -->
+        <div class="relative bg-slate-900/90 backdrop-blur-2xl border border-slate-800/80 p-4 rounded-3xl shadow-2xl w-full aspect-square max-w-[370px] grid grid-cols-3 gap-3.5">
+            <button onclick="handleCellClick(0)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="0">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(1)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="1">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(2)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="2">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(3)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="3">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(4)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="4">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(5)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="5">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(6)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="6">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(7)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="7">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+            <button onclick="handleCellClick(8)" class="cell group relative bg-slate-950/90 hover:bg-slate-900 border border-slate-800/90 rounded-2xl flex items-center justify-center text-5xl font-black transition-all duration-300 active:scale-95 shadow-inner" data-index="8">
+                <span class="cell-content transform scale-0 transition-transform duration-300"></span>
+            </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="w-full flex gap-3 mt-6">
+            <button onclick="resetGame()" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold py-3.5 px-4 rounded-2xl transition-all duration-300 shadow-xl flex items-center justify-center space-x-2 text-sm group">
+                <i class="fa-solid fa-rotate-right text-cyan-400 group-hover:rotate-180 transition-transform duration-500"></i>
+                <span>Reset Round</span>
+            </button>
+            <button onclick="resetScores()" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-rose-400 font-bold py-3.5 px-4 rounded-2xl transition-all duration-300 shadow-xl flex items-center justify-center text-sm" title="Reset All Scores">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Clean Footer -->
+    <footer class="w-full py-5 text-center text-xs text-slate-500 z-10 border-t border-slate-900/80 bg-slate-950/40 backdrop-blur-md">
+        <p class="tracking-wider uppercase font-semibold text-[10px] text-slate-500">Neo-Tactics Quantum Edition • Fully Playable Web Arcade</p>
+    </footer>
+
+    <!-- Victory / Draw Modal Dialog -->
+    <div id="customModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-slate-900 border border-slate-800 p-7 rounded-3xl max-w-sm w-full mx-4 text-center shadow-2xl transform scale-95 transition-transform duration-300" id="modalCard">
+            <div id="modalIconContainer" class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-3xl shadow-inner">
+                <i id="modalIcon" class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 id="modalTitle" class="font-outfit font-extrabold text-2xl text-white mb-2">Round Over!</h3>
+            <p id="modalMessage" class="text-sm text-slate-300 mb-6">Player X has claimed quantum victory!</p>
+            <button onclick="closeModal()" class="w-full bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl shadow-lg shadow-cyan-500/25 transition-all text-sm uppercase tracking-wider">
+                Continue Battle
+            </button>
+        </div>
+    </div>
+
+    <!-- External JavaScript script link -->
+    <script src="script.js"></script>
+</body>
+</html>
